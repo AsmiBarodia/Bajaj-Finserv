@@ -1,95 +1,65 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+import { useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
+    const [jsonInput, setJsonInput] = useState('');
+    const [response, setResponse] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async () => {
+        try {
+            const parsedInput = JSON.parse(jsonInput);
+            const res = await axios.post('/api/bfhl', parsedInput);
+            setResponse(res.data);
+            setError('');
+        } catch (e) {
+            setError('Invalid JSON or server error.');
+            console.error(e);
+        }
+    };
+
+    const handleSelectChange = (e) => {
+        const value = Array.from(e.target.selectedOptions, option => option.value);
+        setSelectedOptions(value);
+    };
+
+    return (
         <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
+            <h1>Enter JSON Input</h1>
+            <textarea
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                placeholder='{"data": ["A", "C", "z"]}'
+                rows={4}
+                cols={50}
             />
-          </a>
+            <button onClick={handleSubmit}>Submit</button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            {response && (
+                <div>
+                    <h2>Response</h2>
+                    <select multiple onChange={handleSelectChange}>
+                        <option value="alphabets">Alphabets</option>
+                        <option value="numbers">Numbers</option>
+                        <option value="highest_lowercase_alphabet">Highest lowercase alphabet</option>
+                    </select>
+
+                    <div>
+                        {selectedOptions.includes('alphabets') && (
+                            <p>Alphabets: {JSON.stringify(response.alphabets)}</p>
+                        )}
+                        {selectedOptions.includes('numbers') && (
+                            <p>Numbers: {JSON.stringify(response.numbers)}</p>
+                        )}
+                        {selectedOptions.includes('highest_lowercase_alphabet') && (
+                            <p>Highest lowercase alphabet: {JSON.stringify(response.highest_lowercase_alphabet)}</p>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    );
 }
