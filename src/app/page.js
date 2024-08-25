@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
 import axios from 'axios';
+import * as styles from  "./page.module.css" ;
 
 export default function Home() {
     const [jsonInput, setJsonInput] = useState('');
@@ -9,9 +10,10 @@ export default function Home() {
     const [error, setError] = useState('');
 
     const handleSubmit = async () => {
+        setError("");
         try {
             const parsedInput = JSON.parse(jsonInput);
-            const res = await axios.post('/api/bfhl', parsedInput);
+            const res = await axios.post('/bfhl', parsedInput);
             setResponse(res.data);
             setError('');
         } catch (e) {
@@ -26,22 +28,25 @@ export default function Home() {
     };
 
     return (
-        <div>
-            <h1>Enter JSON Input</h1>
+        <div className={styles.componentWrapper}>
+            <div className={styles.formWrapper}>
+            <label htmlFor={"apiInput"}><b>Enter JSON Input</b></label>
             <textarea
+                id={"apiInput"}
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
                 placeholder='{"data": ["A", "C", "z"]}'
                 rows={4}
                 cols={50}
+                className={styles.apiInput}
             />
-            <button onClick={handleSubmit}>Submit</button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <button className={styles.submitButton} onClick={handleSubmit}>Submit</button>
+            {error && <p style={{ color: 'red' }}><b>{error}</b></p>}
 
-            {response && (
-                <div>
+            {!error && response && (
+                <div className={styles.responseWrapper}>
                     <h2>Response</h2>
-                    <select multiple onChange={handleSelectChange}>
+                    <select className={styles.dropdownList} multiple onChange={handleSelectChange}>
                         <option value="alphabets">Alphabets</option>
                         <option value="numbers">Numbers</option>
                         <option value="highest_lowercase_alphabet">Highest lowercase alphabet</option>
@@ -60,6 +65,7 @@ export default function Home() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }
